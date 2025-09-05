@@ -6,7 +6,6 @@ import { Stage, OrbitControls } from '@react-three/drei';
 import { MugModel } from './MugModel';
 import { useTextureManager } from '@/hooks/useTextureManager';
 
-// As props relacionadas ao Decal (designPosition, designSize, designRotation) foram removidas.
 interface Mug3DViewerProps {
   uploadedImage: string | null;
   customText: string;
@@ -16,8 +15,6 @@ interface Mug3DViewerProps {
   onExportReady: (trigger: () => string | undefined) => void;
 }
 
-// O componente interno Scene foi simplificado. Ele não precisa mais
-// receber e repassar as props do Decal.
 const Scene = ({ onExportReady, texture }: any) => {
   const { gl, scene, camera } = useThree();
 
@@ -33,15 +30,17 @@ const Scene = ({ onExportReady, texture }: any) => {
   return (
     <>
       <Stage environment="city" intensity={0.6} adjustCamera>
-        {/* A chamada para MugModel agora passa apenas a textura */}
-        <MugModel texture={texture} />
+        {/* Adicionado forceTestTexture para diagnóstico */}
+        <MugModel 
+          texture={texture} 
+          forceTestTexture={false} // <-- MUDE PARA 'true' AQUI PARA ATIVAR O TESTE
+        />
       </Stage>
       <OrbitControls makeDefault minPolarAngle={Math.PI / 2.5} maxPolarAngle={Math.PI / 2.5} enableZoom enablePan={false} />
     </>
   );
 };
 
-// O componente principal também foi simplificado, removendo o repasse das props {...props}
 export function Mug3DViewer({ 
   onExportReady, 
   uploadedImage, 
@@ -50,7 +49,8 @@ export function Mug3DViewer({
   textFont, 
   textSize 
 }: Mug3DViewerProps) {
-  const texture = useTextureManager({
+  // Ajustado para a nova estrutura de retorno do hook
+  const { texture } = useTextureManager({
     imageSrc: uploadedImage,
     text: customText,
     textColor: textColor,
