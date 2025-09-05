@@ -1,69 +1,80 @@
 // src/components/3d/Mug3DViewer.tsx
 
-import { useEffect } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { Stage, OrbitControls } from '@react-three/drei';
 import { MugModel } from './MugModel';
 import { useTextureManager } from '@/hooks/useTextureManager';
 
+// Interface de props simplificada (onExportReady foi removido)
 interface Mug3DViewerProps {
   uploadedImage: string | null;
   customText: string;
   textColor: string;
   textFont: string;
   textSize: number;
-  onExportReady: (trigger: () => string | undefined) => void;
+  textureOffsetX: number;
+  imageScaleX: number;
+  imageScaleY: number;
+  imageOffsetX: number;
+  imageOffsetY: number;
+  imageRotation: number;
+  textScaleY: number;
+  textOffsetX: number;
+  textOffsetY: number;
+  textRotation: number;
 }
 
-const Scene = ({ onExportReady, texture }: any) => {
-  const { gl, scene, camera } = useThree();
-
-  useEffect(() => {
-    const triggerExport = () => {
-      gl.render(scene, camera);
-      return gl.domElement.toDataURL('image/png');
-    };
-
-    onExportReady(triggerExport);
-  }, [gl, scene, camera, onExportReady]);
-  
-  return (
-    <>
-      <Stage environment="city" intensity={0.6} adjustCamera>
-        {/* Adicionado forceTestTexture para diagnóstico */}
-        <MugModel 
-          texture={texture} 
-          forceTestTexture={false} // <-- MUDE PARA 'true' AQUI PARA ATIVAR O TESTE
-        />
-      </Stage>
-      <OrbitControls makeDefault minPolarAngle={Math.PI / 2.5} maxPolarAngle={Math.PI / 2.5} enableZoom enablePan={false} />
-    </>
-  );
-};
-
 export function Mug3DViewer({ 
-  onExportReady, 
   uploadedImage, 
   customText, 
   textColor, 
   textFont, 
-  textSize 
+  textSize,
+  textureOffsetX,
+  imageScaleX,
+  imageScaleY,
+  imageOffsetX,
+  imageOffsetY,
+  imageRotation,
+  textScaleY,
+  textOffsetX,
+  textOffsetY,
+  textRotation,
 }: Mug3DViewerProps) {
-  // Ajustado para a nova estrutura de retorno do hook
   const { texture } = useTextureManager({
     imageSrc: uploadedImage,
     text: customText,
     textColor: textColor,
     fontFamily: textFont,
     fontSize: textSize,
+    textureOffsetX: textureOffsetX,
+    imageScaleX: imageScaleX,
+    imageScaleY: imageScaleY,
+    imageOffsetX: imageOffsetX,
+    imageOffsetY: imageOffsetY,
+    imageRotation: imageRotation,
+    textScaleY: textScaleY,
+    textOffsetX: textOffsetX,
+    textOffsetY: textOffsetY,
+    textRotation: textRotation,
   });
 
   return (
-    <Canvas camera={{ fov: 45 }} shadows dpr={[1, 2]}>
-      <Scene 
-        onExportReady={onExportReady} 
-        texture={texture}
-      />
+    // Adicionado 'id' e removida a lógica de 'onExportReady'
+    <Canvas 
+      id="mug-canvas" 
+      camera={{ fov: 45 }} 
+      shadows 
+      dpr={[1, 2]} 
+      gl={{ preserveDrawingBuffer: true }}
+    >
+      <Stage environment="city" intensity={0.6} adjustCamera>
+        <MugModel 
+          texture={texture} 
+          forceTestTexture={false}
+        />
+      </Stage>
+      <OrbitControls makeDefault enableZoom enablePan={false} />
     </Canvas>
   );
 }
